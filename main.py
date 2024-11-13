@@ -2,10 +2,8 @@ from db import *
 
 db = Db()
 
-db.inserirDados(("Rafael", "rafazanella2004@gmail.com"))
+sql = """INSERT INTO usuarios (nome, email, cargo, cartaoId) VALUES (?, ?, ?, ?)"""
 
-db.listarDados()
-
-db.fecharConexao()
+db.executarComando(sql,("rafael", "rafaaa@gmail.com", "estagiário", "12 43 ox oc"))
 
 print("...")

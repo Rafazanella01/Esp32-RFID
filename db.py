@@ -3,29 +3,25 @@ import sqlite3
 class Db:
     
     def __init__(self):
-        self.con = sqlite3.connect("teste.db")
+        self.con = sqlite3.connect("banco.db")
         self.cursor = self.con.cursor()
         
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS teste (
-            Id INTEGER PRIMARY KEY AUTOINCREMENT,
-            Nome TEXT,
-            Email TEXT)""")
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS usuarios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT,
+            email TEXT UNIQUE,
+            cargo TEXT,
+            cartaoId TEXT UNIQUE)""")
         
-    def inserirDados(self, query):
-        self.cursor.execute("INSERT INTO teste (Nome, Email) VALUES (?, ?)", query) 
-        self.con.commit()  
-        
-    def listarDados(self):
-        self.cursor.execute("SELECT * FROM teste")
-        dados = self.cursor.fetchall()
-        
-        if dados:
-            for registro in dados:
-                id, nome, email = registro
-                
-                print(f"ID: {id}, Nome: {nome}, Email: {email}")
-        else:
-            print("Nenhim dado encontrado!")
-        
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS acessos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuarioId INTEGER,
+            dataAcesso TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (usuarioId) REFERENCES usuarios(id))""")
+    
     def fecharConexao(self):
-        self.con.close() 
+        self.con.close()   
+        
+    def executarComando(self, comando, parametros=()):
+        self.cursor.execute(comando, parametros)
+        self.con.commit()
