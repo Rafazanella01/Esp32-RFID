@@ -4,6 +4,9 @@
 U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, /*clock=*/14, /*data=*/12, /*reset=*/U8X8_PIN_NONE);
 
 #define buzzer D8
+#define ledVerde D0
+#define ledAmarelo D1
+#define ledVermelho D2
 
 void setup() {
   Serial.begin(115200);
@@ -13,6 +16,10 @@ void setup() {
   Serial.println("ESP8266: Aguardando dados do ESP32");
 
   pinMode(buzzer, OUTPUT);
+  pinMode(ledVerde, OUTPUT);
+  pinMode(ledAmarelo, OUTPUT);
+  pinMode(ledVermelho, OUTPUT);
+
 }
 
 void loop() {
@@ -30,6 +37,10 @@ void loop() {
 
         digitalWrite(buzzer, HIGH);
         delay(100);
+
+        digitalWrite(ledVerde, HIGH);
+        delay(10);
+        digitalWrite(ledVerde, LOW);
 
         digitalWrite(buzzer, LOW);
         delay(100);
