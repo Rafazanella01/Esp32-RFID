@@ -23,10 +23,12 @@ void setup() {
 }
 
 void loop() {
-  if (Serial.available() > 0) {
+  if (Serial.available() > 0)
+  {
     String serialCardID = Serial.readStringUntil('\n');
 
-    if (serialCardID.startsWith("CARD:")) {
+    if (serialCardID.startsWith("CARD:"))
+    {
         String cardID = serialCardID.substring(5); //Remove o "CARD:"
         //Exibir o ID do cartão no display OLED
         u8g2.clearBuffer();
