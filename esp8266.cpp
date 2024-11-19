@@ -12,21 +12,32 @@ void setup() {
   u8g2.setFont(u8g2_font_ncenB08_tr);
   Serial.println("ESP8266: Aguardando dados do ESP32");
 
+  pinMode(buzzer, OUTPUT);
 }
 
 void loop() {
   if (Serial.available() > 0) {
-    String cardID = Serial.readStringUntil('\n');
+    String serialCardID = Serial.readStringUntil('\n');
 
-    //Exibir o ID do cartão no display OLED
-    u8g2.clearBuffer();
-    u8g2.setCursor(0, 24);
-    u8g2.print("Cartao lido:");
-    u8g2.setCursor(0, 48);
-    u8g2.print(cardID);
-    u8g2.sendBuffer();
+    if (serialCardID.startsWith("CARD:")) {
+        String cardID = serialCardID.substring(5); //Remove o "CARD:"
+        //Exibir o ID do cartão no display OLED
+        u8g2.clearBuffer();
+        u8g2.setCursor(0, 24);
+        u8g2.print("Cartao lido:");
+        u8g2.setCursor(0, 48);
+        u8g2.print(cardID);
 
-    Serial.print("ID do Cartao Recebido: ");
-    Serial.println(cardID);
+        digitalWrite(buzzer, HIGH);
+        delay(100);
+
+        digitalWrite(buzzer, LOW);
+        delay(100);
+
+        u8g2.sendBuffer();
+
+        Serial.print("ID do Cartao Recebido: ");
+        Serial.println(cardID);
+    }
   }
 }

@@ -24,6 +24,6 @@ void loop() {
     cardID += String(rfid.uid.uidByte[i], HEX);
   }
 
-  Serial.println(cardID)
+  Serial.println("CARD:" + cardID);
   delay(1000);
 }
