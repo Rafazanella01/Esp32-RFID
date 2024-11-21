@@ -15,7 +15,7 @@ void acessoPermitido()
     digitalWrite(buzzer, HIGH);
     delay(50);
     digitalWrite(buzzer, LOW);
-    delay(100);
+    delay(120);
     digitalWrite(buzzer, HIGH);
     delay(50);
     digitalWrite(buzzer, LOW);
@@ -35,6 +35,69 @@ void acessoNegado()
   delay(100);
 }
 
+String cadastrandoCard()
+{
+  while (1) {
+
+    digitalWrite(ledAmarelo, HIGH);
+    delay(500);
+    digitalWrite(ledAmarelo, LOW);
+    delay(500);
+
+    u8g2.clearBuffer();
+    u8g2.sendBuffer();
+
+    if (Serial.available() > 0) {
+      String serialCardID = Serial.readStringUntil('\n');
+
+      if (serialCardID.startsWith("CARD:")) {
+        String cardID = serialCardID.substring(5); 
+        cardID.toUpperCase();
+
+        u8g2.clearBuffer();
+        u8g2.setCursor(0, 24);
+        u8g2.print("Cartao Cadastrado:");
+        u8g2.setCursor(0, 48);
+        u8g2.print(cardID);
+
+        tone(buzzer, 1800);
+        delay(200);
+        tone(buzzer, 2200);
+        delay(100);
+
+        noTone(buzzer);
+
+        u8g2.sendBuffer();
+
+        digitalWrite(ledVerde, HIGH);
+        delay(60);
+        digitalWrite(ledVerde,LOW);
+        delay(30);
+        digitalWrite(ledVerde, HIGH);
+        delay(60);
+        digitalWrite(ledVerde,LOW);
+        delay(30);
+        digitalWrite(ledVerde, HIGH);
+        delay(60);
+        digitalWrite(ledVerde,LOW);
+        delay(30);
+        digitalWrite(ledVerde, HIGH);
+        delay(60);
+        digitalWrite(ledVerde,LOW);
+
+        return cardID;
+      } else {
+        return ""; 
+      }
+    }
+  }
+}
+
+void exibirNoDisplay()
+{
+
+}
+
 void setup() {
   Serial.begin(115200);
   u8g2.begin();
@@ -50,6 +113,9 @@ void setup() {
 }
 
 void loop() {
+
+  //String id = cadastrandoCard();
+
   if (Serial.available() > 0)
   {
     String serialCardID = Serial.readStringUntil('\n');
@@ -57,6 +123,8 @@ void loop() {
     if (serialCardID.startsWith("CARD:"))
     {
         String cardID = serialCardID.substring(5); //Remove o "CARD:"
+        cardID.toUpperCase();
+
         //Exibir o ID do cartão no display OLED
         u8g2.clearBuffer();
         u8g2.setCursor(0, 24);
