@@ -9,14 +9,14 @@ async def create_tables():
         log_date timestamp DEFAULT (NOW() AT TIME ZONE 'America/Sao_Paulo')
         );""")
 
-    result = await query("""CREATE TABLE IF NOT EXISTS cadastros(
+    await query("""CREATE TABLE IF NOT EXISTS cadastros(
         id int NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-        rfid text NOT NULL UNIQUE,
+        name text NOT NULL,
+        email text NOT NULL UNIQUE,
+        rfid text UNIQUE,
         create_date timestamp DEFAULT (NOW() AT TIME ZONE 'America/Sao_Paulo'),
-        esp_id int NOT NULL
-        );""")
-
-    print(result)    
+        esp_id int 
+        );""")    
     
 
 asyncio.run(create_tables())

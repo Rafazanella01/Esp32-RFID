@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <style>
+      body {
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: blueviolet;
+        font-size: 20px;
+        color: white;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 20%;
+        gap: 20px;
+      }
+      div {
+        display: flex;
+        width: 100%;
+        gap: 5px;
+        justify-content: space-around;
+      }
+
+      button {
+        width: 90%;
+      }
+    </style>
+  </head>
+  <body>
+    <form action="/cadastros" method="POST">
+      <div>Email: <input type="email" name="email" placeholder="email" /></div>
+      <div>Nome: <input type="text" name="name" placeholder="nome" /></div>
+      <button type="submit">Enviar ao ESP</button>
+    </form>
+  </body>
+</html>

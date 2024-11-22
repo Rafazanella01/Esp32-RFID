@@ -18,7 +18,8 @@ async def query(pedido, params = None):
         return result
 
     except Exception as e:
-        return (f'Erro causado: {e}')
+        print((f'Erro causado: {e}'))
+        return ('500')
     
     finally:
         if conn:
