@@ -18,33 +18,36 @@ asyncio.run(build())
 async def index():
     return render_template("index.html")
 
-@app.route('/logs')
+@app.route('/logs', methods=["GET", "POST"])
 async def logs():
-    rfid = request.args.get("id")
-    status = request.args.get("status")
-    logs = []
+    if request.method == "POST":
+        data = request.get_json()
+        uid = data.get("id")
+        status = data.get("status")
 
-    if rfid and status:
-        # Prepara a consulta SQL com parâmetros para evitar SQL injection
-        queryString = "INSERT INTO logs(rfid, status) VALUES ($1, $2);"
-        result = await query(queryString, (rfid, status))  # Passando os parâmetros como tupla
+        if uid and status:
+            # Prepara a consulta SQL com parâmetros para evitar SQL injection
+            queryString = "INSERT INTO logs(uid, status) VALUES ($1, $2);"
+            result = await query(queryString, (uid, status))  # Passando os parâmetros como tupla
 
-        # print ('response return to api: ' + result)
+            # Retorna uma resposta para o cliente
+            return Response(status=201)
 
-        # Retorna uma resposta para o cliente
-        return Response(status=200)
+        else:
+           return Response(status=204) 
 
-    response = await query("SELECT rfid, status, log_date FROM logs WHERE id IS NOT NULL;")
-    
-    for i in response:
-        logs.append({
-            "rfid": i[0],
-            "status": i[1],
-            "data": i[2].strftime('%a, %d %b %Y %H:%M:%S GMT')  # Format datetime
-        })
+    if request.method == "GET":
+        logs = []
 
+        response = await query("SELECT uid, status, log_date FROM logs WHERE uid IS NOT NULL;")
+        for i in response:
+            logs.insert(0, {
+                "uid": i[0],
+                "status": i[1],
+                "data": i[2].strftime('%a, %d %b %Y %H:%M:%S GMT')  # Format datetime
+            })
 
-    return jsonify(logs), 400
+        return jsonify(logs), 200
 
 @app.route('/cadastros', methods=["GET", "POST"])
 async def cadastro():
@@ -57,7 +60,7 @@ async def cadastro():
         name = data.get('name') 
 
         if email and name:
-            queryStr = "INSERT INTO cadastros(name, email) VALUES ($1, $2);"
+            queryStr = "INSERT INTO register(name, email) VALUES ($1, $2);"
             await query(queryStr, (name, email))
             return redirect("/")
 
@@ -65,16 +68,50 @@ async def cadastro():
 
 @app.route('/register', methods=["GET", "POST"])
 async def register():
-    if request.method == "GET":
-        registers = []
-        response = await query("SELECT id, name, email FROM cadastros WHERE rfid is NULL");
-        
-        for i in response:
-            registers.append({"name": i[1], "email": i[2]})
 
+    registers = []
+    response = await query("SELECT uid, name, email FROM register WHERE uid is NULL");
+    for i in response:
+        registers.append({"name": i[1], "email": i[2]})
+
+    if request.method == "GET":
         if not registers:
-            return Response("Sem cadastros pendentes!",status=200)
-        return jsonify(registers), 201
+            return "Sem cadastros pendentes!", 204
+        
+        return jsonify(registers), 200
+    
+    if request.method == "POST":
+        data = request.get_json()
+        uid = data.get("uid")
+        name = request[0].get("name")
+        email = request[0].get("email")
+
+        if uid and name and email:
+            queryStr = "INSERT INTO cadastros(uid, name, email) VALUES ($1, $2, $3);"
+            await query(queryStr, (uid, name, email))
+
+            return "Cadastrado com sucesso!", 201
+        
+        return "Algum dado faltando!", 206
+
+@app.route('/verify')
+async def verify():
+    uid = request.args.get("uid")
+    if uid:
+        # Prepara a consulta SQL com parâmetros para evitar SQL injection
+        queryString = """
+                SELECT EXISTS (
+                    SELECT 1 
+                    FROM cadastros 
+                    WHERE uid = $1
+                );"""
+        result = await query(queryString, (uid,))  # Passando os parâmetros como tupla
+        if result[0][0]:
+            return Response(status=200)
+        # Retorna uma resposta para o cliente
+        return Response(status=404)
+    
+    return render_template("verify.html")
 
 if __name__ == '__main__':
     app.run(debug=True,host="0.0.0.0", port=5000)
