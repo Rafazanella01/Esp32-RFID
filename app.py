@@ -70,9 +70,9 @@ async def cadastro():
 async def register():
 
     registers = []
-    response = await query("SELECT uid, name, email FROM register WHERE uid is NULL");
+    response = await query("SELECT id, name, email FROM register WHERE uid is NULL");
     for i in response:
-        registers.append({"name": i[1], "email": i[2]})
+        registers.append({"id": i[0], "name": i[1], "email": i[2]})
 
     if request.method == "GET":
         if not registers:
@@ -83,12 +83,16 @@ async def register():
     if request.method == "POST":
         data = request.get_json()
         uid = data.get("uid")
-        name = request[0].get("name")
-        email = request[0].get("email")
+        id = registers[0].get("id")
+        name = registers[0].get("name")
+        email = registers[0].get("email")
 
         if uid and name and email:
             queryStr = "INSERT INTO cadastros(uid, name, email) VALUES ($1, $2, $3);"
             await query(queryStr, (uid, name, email))
+
+            queryStr = "DELETE FROM register WHERE id = $1;"
+            await query(queryStr, (id,))
 
             return "Cadastrado com sucesso!", 201
         
