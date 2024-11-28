@@ -8,11 +8,14 @@ U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, /*clock=*/14, /*data=*/12, /*r
 #define ledAmarelo D1
 #define ledVermelho D2
 
-String lerCartao() {
-  if (Serial.available() > 0) {
+String lerCartao()
+{
+  if (Serial.available() > 0)
+  {
     String serialCardID = Serial.readStringUntil('\n');
 
-    if (serialCardID.startsWith("CARD:")) {
+    if (serialCardID.startsWith("CARD:"))
+    {
       String cardID = serialCardID.substring(5);
       cardID.toUpperCase();
 
@@ -22,7 +25,8 @@ String lerCartao() {
   return "";
 }
 
-void acessoPermitido() {
+void acessoPermitido()
+{
   digitalWrite(ledVerde, HIGH);
 
   digitalWrite(buzzer, HIGH);
@@ -36,7 +40,8 @@ void acessoPermitido() {
   digitalWrite(ledVerde, LOW);
 }
 
-void acessoNegado() {
+void acessoNegado()
+{
   tone(buzzer, 300);
 
   digitalWrite(ledVermelho, HIGH);
@@ -47,8 +52,10 @@ void acessoNegado() {
   delay(100);
 }
 
-String cadastrandoCard() {
-  while (1) {
+String cadastrandoCard()
+{
+  while (1)
+  {
 
     digitalWrite(ledAmarelo, HIGH);
     delay(500);
@@ -60,7 +67,8 @@ String cadastrandoCard() {
 
     String card = lerCartao();
 
-    if (card != "") {
+    if (card != "")
+    {
       u8g2.clearBuffer();
       u8g2.setCursor(0, 24);
       u8g2.print("Cartao Cadastrado:");
@@ -78,16 +86,20 @@ String cadastrandoCard() {
       digitalWrite(ledVerde, HIGH);
       delay(60);
       digitalWrite(ledVerde, LOW);
-    } else {
+    }
+    else
+    {
       Serial.println("Nenhum cartao lido.");
     }
   }
 }
 
-void exibirNoDisplay() {
+void exibirNoDisplay()
+{
 }
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
   u8g2.begin();
   u8g2.clearBuffer();
@@ -100,12 +112,14 @@ void setup() {
   pinMode(ledVermelho, OUTPUT);
 }
 
-void loop() {
+void loop()
+{
 
   String id = lerCartao();
 
-  if (id != "") {
-    //Exibir o ID do cartão no display OLED
+  if (id != "")
+  {
+    // Exibir o ID do cartão no display OLED
     u8g2.clearBuffer();
     u8g2.setCursor(0, 24);
     u8g2.print("Cartao lido:");
@@ -115,7 +129,7 @@ void loop() {
     u8g2.sendBuffer();
 
     acessoPermitido();
-    //acessoNegado();
+    // acessoNegado();
 
     Serial.print("ID do Cartao Recebido: ");
     Serial.println(id);
