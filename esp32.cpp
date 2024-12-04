@@ -15,7 +15,8 @@ EstadoSistema estadoAtual = REPOUSO;  //Estado inicial
 
 String uidLido;
 
-String serverPath = "https://congenial-space-acorn-4jq9qqx76597fqppw-5000.app.github.dev";
+//String serverPath = "https://congenial-space-acorn-4jq9qqx76597fqppw-5000.app.github.dev";
+String serverPath = "https://fuzzy-succotash-7vvjpw749r55hq65-5000.app.github.dev";
 
 //const char *ssid = "ESP32";
 //const char *password = "esp32wifi";
@@ -26,7 +27,12 @@ String serverPath = "https://congenial-space-acorn-4jq9qqx76597fqppw-5000.app.gi
 const char *ssid = "Redmi 9C";
 const char *password = "123456789";
 
-unsigned int leituraAnteriorBotao = 0;
+//unsigned int leituraAnteriorBotao = 0;
+int leituraAnteriorBotao = HIGH;         //Estado anterior do botão (botão solto inicialmente)
+int leituraBotao = HIGH;                 //Estado atual do botão
+unsigned long ultimoPressionamento = 0;  //Armazena o último tempo de pressionamento
+unsigned long tempoDebounce = 50;        //Tempo de debounce para evitar leituras rápidas
+
 unsigned int ledAmareloCont = 0;
 
 // Pinos RC522
@@ -40,6 +46,8 @@ unsigned int ledAmareloCont = 0;
 
 #define sdaLcd 5
 #define sclLcd 4
+
+#define TEMPO_DEBOUNCE 50
 
 
 MFRC522 rfid(SS_PIN, RST_PIN);
@@ -142,11 +150,11 @@ void notificaAcessoNegado() {
 void ledAmareloCadastro() {
   ledAmareloCont++;
 
-  if (ledAmareloCont == 20){
+  if (ledAmareloCont == 20) {
     digitalWrite(ledAmarelo, HIGH);
   }
 
-  if (ledAmareloCont == 40){
+  if (ledAmareloCont == 40) {
     digitalWrite(ledAmarelo, LOW);
     ledAmareloCont = 0;
   }
@@ -157,7 +165,7 @@ void setup() {
   pinMode(ledVerde, OUTPUT);
   pinMode(ledAmarelo, OUTPUT);
   pinMode(ledVermelho, OUTPUT);
-  pinMode(botao, INPUT_PULLUP);
+  pinMode(botao, INPUT);
   Serial.begin(115200);
 
   WiFi.begin(ssid, password);
@@ -173,6 +181,7 @@ void setup() {
   lcd.begin(16, 2);
   lcd.backlight();  //Liga a luz de fundo do LCD
   lcd.clear();      //Limpa o display no início
+  lcd.print("teste");
 
   SPI.begin();
   rfid.PCD_Init();
@@ -180,19 +189,22 @@ void setup() {
 }
 
 void verificarBotao() {
-  int leituraBotao = digitalRead(botao);
+  leituraBotao = digitalRead(botao);  //Lê o estado atual do botão
+  // Serial.println(leituraBotao);       //Imprime para debug
 
-  if (leituraBotao) {
-    leituraBotao = 1;
-    if (leituraAnteriorBotao != leituraBotao) {
+  //Verifica se passou tempo suficiente para o debouncing
+  if (leituraBotao != leituraAnteriorBotao && (millis() - ultimoPressionamento) > tempoDebounce) {
+    //Atualiza o tempo do último pressionamento
+    ultimoPressionamento = millis();
+
+    //Se o botão foi pressionado, muda para o estado de CADASTRO
+    if (leituraBotao == LOW) {  //Botão pressionado
       estadoAtual = CADASTRO;
     }
-    leituraAnteriorBotao = leituraBotao;
-    delay(500);
-  } else {
-    leituraBotao = 0;
-    leituraAnteriorBotao = leituraBotao;
   }
+
+  //Atualiza o estado anterior do botão
+  leituraAnteriorBotao = leituraBotao;
 }
 
 String lerCartao() {
@@ -298,6 +310,7 @@ void loop() {
           lcd.setCursor(0, 0);
           lcd.print("Sem Pendentes!");
           notificaAcessoNegado();
+          delay(2000);
           lcd.clear();
           estadoAtual = REPOUSO;
           break;
@@ -338,6 +351,6 @@ void loop() {
 
   // Se não houver cartão presente, reseta o último UID
   if (uid == "") {
-    ultimoUID = "";  // Limpa o último UID lido
+    ultimoUID = "";  // Limpa o último UID lido
   }
 }
