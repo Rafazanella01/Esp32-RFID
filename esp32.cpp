@@ -17,17 +17,17 @@ String uidLido;
 
 String serverPath = "https://congenial-space-acorn-4jq9qqx76597fqppw-5000.app.github.dev";
 
-const char *ssid = "Redmi 9C";
-const char *password = "123456789";
+//const char *ssid = "ESP32";
+//const char *password = "esp32wifi";
 //const char *ssid = "VERA";
 //const char *password = "vera19901";
 //const char *ssid = "Patrícia_PontoCom";
 //const char *password = "pati19901";
+const char *ssid = "Redmi 9C";
+const char *password = "123456789";
 
 unsigned int leituraAnteriorBotao = 0;
-
-unsigned long tempoCadastro = 0;
-const unsigned long TEMPO_MAX_CADASTRO = 30000;  //30 segundos
+unsigned int ledAmareloCont = 0;
 
 // Pinos RC522
 #define SS_PIN 21
@@ -140,6 +140,16 @@ void notificaAcessoNegado() {
 }
 
 void ledAmareloCadastro() {
+  ledAmareloCont++;
+
+  if (ledAmareloCont == 20){
+    digitalWrite(ledAmarelo, HIGH);
+  }
+
+  if (ledAmareloCont == 40){
+    digitalWrite(ledAmarelo, LOW);
+    ledAmareloCont = 0;
+  }
 }
 
 void setup() {
@@ -246,6 +256,8 @@ void loop() {
       break;
 
     case LEITURA:
+      lcd.clear();
+      lcd.print("Analisando CARD!");
       if (uidLido != "") {
         String status = "Rejeitado";  //Valor padrão de status
 
@@ -268,7 +280,7 @@ void loop() {
         lcd.print("CARD: " + uidLido);  //Exibe o UID no LCD
         lcd.setCursor(0, 1);
         lcd.print("Status: " + status);  //Exibe o status no LCD
-        
+
         delay(1000);
         // Reseta o UID lido e volta ao estado de repouso
         uidLido = "";
@@ -296,6 +308,7 @@ void loop() {
       lcd.print("Aproxime o CARD:");
       lcd.setCursor(0, 1);
       lcd.print("Para cadastro!");
+      ledAmareloCadastro();
       if (uid != "") {
         lcd.clear();
         lcd.print("CARD: " + uid);
@@ -305,10 +318,16 @@ void loop() {
           lcd.print("Cadastrado!");
           Serial.println("Cartão cadastrado com sucesso.");
           estadoAtual = REPOUSO;  // Retorna ao estado de repouso
+          digitalWrite(ledAmarelo, LOW);
+          notificaAcessoPermitido();
+          sendLog(uid, "Cadastrado");
         } else {
           lcd.print("Falha no Cadastro!");
           Serial.println("Falha no cadastro. Tentando novamente.");
+          sendLog(uid, "Falha no cadastro");
         }
+        delay(500);
+        lcd.clear();
       }
       break;
 
