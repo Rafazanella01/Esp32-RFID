@@ -1,7 +1,7 @@
 from db import query
 import asyncio
 
-async def create_tables():
+async def create_tables(): # Cria todas as tabelas necessárias para o uso do app
     await query("""CREATE TABLE IF NOT EXISTS logs(
         id int NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
         uid text NOT NULL,
